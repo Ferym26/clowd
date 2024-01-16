@@ -5,18 +5,45 @@
 			h1.redactor__title
 		.redactor__body
 			ul
-				li {{ 123 }}
+				li(v-for="el in elements") {{ el.word }}
 
 </template>
 
-<script setup>
-	const ref = this.$fire.firestore
-		.collection('master')
-		.doc('dect');
+<script>
+export default {
+	name: 'RedactorPage',
 
-	const snapshot = await ref.get()
-	const doc = snapshot.data();
-	console.log(doc.word);
+	head() {
+		return {
+			title: 'Redactor',
+			destroySync: null,
+		}
+	},
+
+	data: () => ({
+		elements: []
+	}),
+
+	async mounted() {
+		const collection = this.$fire.firestore
+			.collection('master')
+
+		const ref = collection
+			.doc('dect');
+
+		this.destroySync = collection.onSnapshot((query) => {
+			query.forEach((doc) => {
+				this.elements = []
+				this.elements.push(doc.data())
+			})
+		})
+
+		const snapshot = await ref.get()
+		const doc = snapshot.data();
+	},
+
+	unmounted() {
+		this.destroySync && this.destroySync()
+	}
+}
 </script>
-
-
