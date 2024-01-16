@@ -4,19 +4,19 @@
 		.redactor__header
 			h1.redactor__title
 		.redactor__body
-			ul
-				li(v-for="el in elements") {{ el.word }}
+			p {{ word }}
 
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
 	name: 'RedactorPage',
 
 	head() {
 		return {
 			title: 'Redactor',
-			destroySync: null,
 		}
 	},
 
@@ -24,26 +24,16 @@ export default {
 		elements: []
 	}),
 
+	computed: {
+		...mapGetters(['word']),
+	},
+
 	async mounted() {
-		const collection = this.$fire.firestore
-			.collection('master')
-
-		const ref = collection
-			.doc('dect');
-
-		this.destroySync = collection.onSnapshot((query) => {
-			query.forEach((doc) => {
-				this.elements = []
-				this.elements.push(doc.data())
-			})
-		})
-
-		const snapshot = await ref.get()
-		const doc = snapshot.data();
+		await this.$store.dispatch('bindCountDocument')
 	},
 
 	unmounted() {
-		this.destroySync && this.destroySync()
+		this.$store.dispatch('unbindCountDocument')
 	}
 }
 </script>
