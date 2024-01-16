@@ -4,7 +4,9 @@
 		.redactor__header
 			h1.redactor__title
 		.redactor__body
-			p {{ word }}
+			.redactor-item(v-for="el in word")
+				span {{ el }}
+				button(@click="removeWord(el)") X
 
 </template>
 
@@ -28,6 +30,16 @@ export default {
 		...mapGetters(['word']),
 	},
 
+	methods: {
+		removeWord(el) {
+			const edited = this.word.filter(item => item !== el);
+			this.$fire.firestore
+				.collection('master')
+				.doc('dect')
+				.update({ word: edited })
+		},
+	},
+
 	async mounted() {
 		await this.$store.dispatch('bindCountDocument')
 	},
@@ -37,3 +49,11 @@ export default {
 	}
 }
 </script>
+
+<style>
+	.redactor-item {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+</style>
